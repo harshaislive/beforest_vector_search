@@ -17,11 +17,26 @@ export async function POST(request: NextRequest) {
     const searchParams = new URL(request.url).searchParams;
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '12', 10);
+    const startDate = searchParams.get('start_date');
+    const endDate = searchParams.get('end_date');
 
     // Perform the image search
-    const results = await searchByImage(file, {
+    let results = await searchByImage(file, {
       limit: 144, // Always fetch max results for pagination
     });
+
+    // Apply date filtering while maintaining similarity-based sorting
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate + 'T00:00:00Z') : new Date(0);
+      const end = endDate ? new Date(endDate + 'T23:59:59Z') : new Date();
+      
+      results = results.filter(result => {
+        const modifiedDate = new Date(result.modified_date);
+        return modifiedDate >= start && modifiedDate <= end;
+      });
+
+      console.log(`Date filtering: ${results.length} results between ${start.toISOString()} and ${end.toISOString()}`);
+    }
 
     // Calculate pagination
     const startIndex = (page - 1) * limit;

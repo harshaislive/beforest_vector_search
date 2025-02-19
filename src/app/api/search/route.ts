@@ -8,6 +8,8 @@ export async function GET(request: Request) {
   const query = searchParams.get('query');
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '12', 10);
+  const startDate = searchParams.get('start_date');
+  const endDate = searchParams.get('end_date');
 
   if (!query) {
     return NextResponse.json(
@@ -17,13 +19,29 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Create cache key including date range
+    const cacheKey = `${query}:${startDate || ''}:${endDate || ''}`;
+    
     // Check cache first
-    let results = await getCachedSearchResults(query);
+    let results = await getCachedSearchResults(cacheKey);
 
     // If not in cache, fetch from vector search API
     if (!results) {
       results = await searchImages({ query });
-      await cacheSearchResults(query, results);
+      await cacheSearchResults(cacheKey, results);
+    }
+
+    // Apply date filtering while maintaining similarity-based sorting
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate + 'T00:00:00Z') : new Date(0);
+      const end = endDate ? new Date(endDate + 'T23:59:59Z') : new Date();
+      
+      results = results.filter(result => {
+        const modifiedDate = new Date(result.modified_date);
+        return modifiedDate >= start && modifiedDate <= end;
+      });
+
+      console.log(`Date filtering: ${results.length} results between ${start.toISOString()} and ${end.toISOString()}`);
     }
 
     // Calculate pagination

@@ -1,6 +1,6 @@
 import { SearchResult } from './types';
 
-const VECTOR_SEARCH_API_URL = process.env.VECTOR_SEARCH_API_URL;
+const VECTOR_SEARCH_API_URL = process.env.VECTOR_SEARCH_API_URL as string;
 
 if (!VECTOR_SEARCH_API_URL) {
   throw new Error('Missing Vector Search API URL configuration');

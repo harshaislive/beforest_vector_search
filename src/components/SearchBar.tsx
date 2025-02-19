@@ -102,27 +102,27 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4">
+    <div className="w-full max-w-3xl mx-auto space-y-4 px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row gap-3">
         {/* Text Search */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="relative group">
             <input
               type="text"
               value={query}
               onChange={handleSearch}
               placeholder="Search by keywords..."
-              className="w-full px-4 py-3.5 pl-11 text-[18px] font-arizona-sans text-beforest-earth placeholder-beforest-charcoal/40
-                border-2 border-beforest-gray/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-beforest-olive/30 focus:border-beforest-olive
+              className="w-full px-4 py-2.5 pl-10 text-[15px] font-arizona-sans text-beforest-earth placeholder-beforest-charcoal/40
+                border-2 border-beforest-gray/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-beforest-olive/30 focus:border-beforest-olive
                 bg-white shadow-sm transition-all duration-200 group-hover:border-beforest-olive/60"
               disabled={isUploading}
             />
-            <MagnifyingGlassIcon className="absolute left-3 top-3.5 h-6 w-6 text-beforest-charcoal/60 group-hover:text-beforest-olive transition-colors duration-200" />
+            <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-beforest-charcoal/60 group-hover:text-beforest-olive transition-colors duration-200" />
           </div>
         </div>
 
         {/* Image Search Button */}
-        <div className="relative">
+        <div className="sm:flex-shrink-0">
           <input
             ref={fileInputRef}
             type="file"
@@ -133,37 +133,40 @@ export default function SearchBar() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 font-arizona text-[15px] uppercase tracking-wide rounded-xl
-              shadow-sm transition-all duration-200 border-2 ${
+            className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 font-arizona text-[13px] uppercase tracking-wide rounded-lg
+              shadow-sm transition-all duration-200 border-2 whitespace-nowrap ${
                 isUploading 
                   ? 'bg-beforest-gray/20 text-beforest-charcoal/50 cursor-not-allowed border-beforest-gray/30' 
                   : 'bg-white text-beforest-earth border-beforest-olive/60 hover:bg-beforest-olive/5 hover:border-beforest-olive hover:text-beforest-olive'
               }`}
             disabled={isUploading}
           >
-            <PhotoIcon className="h-5 w-5" />
-            {isUploading ? 'Uploading...' : 'Upload Image to Search'}
+            <PhotoIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">Upload Image to Search</span>
+            <span className="sm:hidden">Upload Image</span>
           </button>
         </div>
       </div>
 
       {/* Date Range Filters */}
-      <div className="flex flex-wrap gap-4 items-center bg-white p-4 rounded-xl border-2 border-beforest-gray/60">
-        <span className="font-arizona text-beforest-earth text-[15px] uppercase tracking-wide">Filter by date</span>
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap gap-3 items-center bg-white p-3 rounded-lg border-2 border-beforest-gray/60">
+        <span className="font-arizona text-beforest-earth text-[13px] uppercase tracking-wide w-full sm:w-auto mb-1 sm:mb-0">
+          Filter by date
+        </span>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <input
             type="date"
             value={dateRange.start}
             onChange={(e) => handleDateChange('start', e.target.value)}
-            className="px-3 py-2 rounded-lg border-2 border-beforest-gray/40 focus:outline-none focus:ring-2 focus:ring-beforest-olive/30 focus:border-beforest-olive
+            className="flex-1 sm:flex-none px-2.5 py-1.5 rounded-md border-2 border-beforest-gray/40 focus:outline-none focus:ring-2 focus:ring-beforest-olive/30 focus:border-beforest-olive
               font-arizona-sans text-sm text-beforest-earth bg-beforest-offwhite hover:border-beforest-olive/60 transition-all duration-200"
           />
-          <span className="font-arizona text-beforest-earth/60">to</span>
+          <span className="font-arizona text-beforest-earth/60 px-1">to</span>
           <input
             type="date"
             value={dateRange.end}
             onChange={(e) => handleDateChange('end', e.target.value)}
-            className="px-3 py-2 rounded-lg border-2 border-beforest-gray/40 focus:outline-none focus:ring-2 focus:ring-beforest-olive/30 focus:border-beforest-olive
+            className="flex-1 sm:flex-none px-2.5 py-1.5 rounded-md border-2 border-beforest-gray/40 focus:outline-none focus:ring-2 focus:ring-beforest-olive/30 focus:border-beforest-olive
               font-arizona-sans text-sm text-beforest-earth bg-beforest-offwhite hover:border-beforest-olive/60 transition-all duration-200"
           />
         </div>

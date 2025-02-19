@@ -68,8 +68,8 @@ export default function SearchContent() {
 
   return (
     <>
-      <div className="flex flex-col items-center mb-12">
-        <div className="w-[240px] h-[80px] relative mb-8">
+      <div className="flex flex-col items-center mb-8 px-4 sm:px-0">
+        <div className="w-[140px] sm:w-[180px] h-[46px] sm:h-[60px] relative mb-4 sm:mb-6">
           <Image
             src="https://beforest.co/wp-content/uploads/2024/10/23-Beforest-Black-with-Tagline.png"
             alt="Beforest Logo"
@@ -78,7 +78,7 @@ export default function SearchContent() {
             className="object-contain"
           />
         </div>
-        <h1 className="font-arizona text-[52px] text-beforest-earth">
+        <h1 className="font-arizona text-[28px] sm:text-[32px] text-beforest-earth tracking-wide text-center">
           Image Search
         </h1>
       </div>
@@ -86,12 +86,12 @@ export default function SearchContent() {
       <SearchBar />
 
       {error && (
-        <div className="mt-8 text-center text-beforest-red font-arizona-sans">
+        <div className="mt-8 px-4 sm:px-0 text-center text-beforest-red font-arizona-sans">
           {error}
         </div>
       )}
 
-      <div className="mt-8">
+      <div className="mt-8 px-4 sm:px-6 lg:px-8">
         <ImageGrid
           images={searchResponse?.results || []}
           isLoading={isLoading}
@@ -99,7 +99,7 @@ export default function SearchContent() {
       </div>
 
       {searchResponse && searchResponse.pagination.totalPages > 1 && (
-        <div className="mt-8 flex justify-center gap-2">
+        <div className="mt-8 flex justify-center gap-2 px-4 sm:px-0 overflow-x-auto pb-2">
           {Array.from({ length: searchResponse.pagination.totalPages }).map((_, i) => (
             <button
               key={i + 1}
@@ -108,7 +108,7 @@ export default function SearchContent() {
                 params.set('page', (i + 1).toString());
                 window.history.pushState(null, '', `?${params.toString()}`);
               }}
-              className={`px-4 py-2 rounded font-arizona text-[14px] uppercase tracking-wide transition-colors
+              className={`px-3 sm:px-4 py-2 rounded font-arizona text-[13px] sm:text-[14px] uppercase tracking-wide transition-colors flex-shrink-0
                 ${page === i + 1
                   ? 'bg-beforest-green text-white'
                   : 'bg-white text-beforest-earth hover:bg-beforest-gray'

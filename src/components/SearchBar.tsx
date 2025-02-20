@@ -19,11 +19,7 @@ export default function SearchBar() {
   const imageFile = useRef<File | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [similarityThreshold, setSimilarityThreshold] = useState(() => {
-    const defaultThreshold = 0.5;
-    const urlThreshold = searchParams.get('certainty_threshold');
-    return urlThreshold ? parseFloat(urlThreshold) : defaultThreshold;
-  });
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
   const [imageSearchStatus, setImageSearchStatus] = useState<'idle' | 'searching' | 'error'>('idle');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageDescription, setImageDescription] = useState<string | null>(null);
@@ -37,34 +33,62 @@ export default function SearchBar() {
     }
   }, [searchParams]);
 
-  const handleSimilarityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSimilarityChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     setSimilarityThreshold(value);
     
-    // Update URL params without triggering a page navigation
+    // Update URL params
     const params = new URLSearchParams(searchParams);
     params.set('certainty_threshold', value.toString());
-    window.history.replaceState({}, '', `/?${params.toString()}`);
+    params.set('page', '1'); // Reset to first page
 
-    // If we have a query or image search active, trigger a new search
-    if (query || (searchParams.get('search_type') === 'image' && imageFile.current)) {
-      executeSearch(query);
+    // Trigger new search with updated threshold
+    if (query) {
+      // For text search
+      params.set('query', query);
+      router.push(`/?${params.toString()}`);
+    } else if (searchParams.get('search_type') === 'image' && imageFile.current) {
+      // For image search
+      setImageSearchStatus('searching');
+      const formData = new FormData();
+      formData.append('file', imageFile.current);
+
+      try {
+        const searchUrl = new URL('/api/search/image', window.location.origin);
+        searchUrl.searchParams.set('page', '1');
+        searchUrl.searchParams.set('limit', '12');
+        searchUrl.searchParams.set('certainty_threshold', value.toString());
+
+        const response = await fetch(searchUrl.toString(), {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error('Image search failed');
+        const data = await response.json();
+        window.dispatchEvent(new CustomEvent('image-search-results', { detail: data }));
+        params.set('search_type', 'image');
+        window.history.replaceState({}, '', `/?${params.toString()}`);
+      } catch (error) {
+        console.error('Error updating search:', error);
+        setImageSearchStatus('error');
+      } finally {
+        setImageSearchStatus('idle');
+      }
+    } else {
+      // Just update URL if no active search
+      window.history.replaceState({}, '', `/?${params.toString()}`);
     }
   };
 
-  const executeSearch = (value: string) => {
-    // Clear image search state
-    const params = new URLSearchParams(searchParams);
-    params.delete('search_type'); // Remove image search marker
-    
-    if (value) {
-      params.set('query', value);
-    } else {
-      params.delete('query');
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const params = new URLSearchParams(searchParams);
+      params.set('query', query);
+      params.set('certainty_threshold', similarityThreshold.toString());
+      params.set('page', '1');
+      router.push(`/?${params.toString()}`);
     }
-    params.set('certainty_threshold', similarityThreshold.toString());
-    params.set('page', '1');
-    router.push(`/?${params.toString()}`);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,12 +99,6 @@ export default function SearchBar() {
     imageFile.current = null;
     setPreviewUrl(null);
     setImageDescription(null);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      executeSearch(query);
-    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,6 +234,9 @@ export default function SearchBar() {
         <div className="flex flex-col gap-3">
           <div className="relative">
             <div className="relative">
+              <p className="absolute -top-5 left-0 text-[11px] text-beforest-charcoal/60 font-arizona-flare">
+                Press Enter to search
+              </p>
               <input
                 type="text"
                 value={query}
@@ -236,7 +257,13 @@ export default function SearchBar() {
                 <div className="h-5 w-5 border-2 border-beforest-olive/30 border-t-beforest-olive rounded-full animate-spin" />
               ) : (
                 <button 
-                  onClick={() => executeSearch(query)}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set('query', query);
+                    params.set('certainty_threshold', similarityThreshold.toString());
+                    params.set('page', '1');
+                    router.push(`/?${params.toString()}`);
+                  }}
                   className="p-2 rounded-md transition-all duration-200 bg-beforest-olive/5 text-beforest-olive hover:bg-beforest-olive/10 active:scale-95"
                   aria-label="Search"
                 >
@@ -286,9 +313,17 @@ export default function SearchBar() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <p className={`font-arizona-flare text-beforest-earth text-sm ${!isDescriptionExpanded && 'line-clamp-2'}`}>
-                        {imageDescription || "Analyzing image..."}
-                      </p>
+                      <div 
+                        className={`font-arizona-flare text-beforest-earth text-sm prose prose-sm max-w-none prose-beforest ${!isDescriptionExpanded && 'line-clamp-2'}`}
+                        dangerouslySetInnerHTML={{ 
+                          __html: imageDescription ? 
+                            imageDescription
+                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                              .replace(/\n/g, '<br />') 
+                            : "Analyzing image..." 
+                        }}
+                      />
                       {imageDescription && imageDescription.length > 100 && (
                         <button
                           onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
@@ -381,7 +416,13 @@ export default function SearchBar() {
           currentImage={imageFile.current}
           onSuggestionClick={(suggestion) => {
             setQuery(suggestion);
-            executeSearch(suggestion);
+            {
+              const params = new URLSearchParams(searchParams);
+              params.set('query', suggestion);
+              params.set('certainty_threshold', similarityThreshold.toString());
+              params.set('page', '1');
+              router.push(`/?${params.toString()}`);
+            }
           }}
         />
       </div>

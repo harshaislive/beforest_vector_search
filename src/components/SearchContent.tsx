@@ -36,7 +36,16 @@ export default function SearchContent() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&page=${page}&limit=12`);
+        const certaintyThreshold = searchParams.get('certainty_threshold');
+        const searchUrl = new URL('/api/search', window.location.origin);
+        searchUrl.searchParams.set('query', query);
+        searchUrl.searchParams.set('page', page.toString());
+        searchUrl.searchParams.set('limit', '12');
+        if (certaintyThreshold) {
+          searchUrl.searchParams.set('certainty_threshold', certaintyThreshold);
+        }
+
+        const response = await fetch(searchUrl.toString());
         if (!response.ok) {
           throw new Error('Search failed');
         }
@@ -51,7 +60,7 @@ export default function SearchContent() {
     }
 
     performSearch();
-  }, [query, page]);
+  }, [query, page, searchParams]);
 
   // Handle image search results
   useEffect(() => {

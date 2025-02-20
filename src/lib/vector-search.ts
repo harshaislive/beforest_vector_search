@@ -3,7 +3,6 @@ import { SearchResult } from './types';
 const VECTOR_SEARCH_API_URL = process.env.VECTOR_SEARCH_API_URL as string;
 
 // Default values for search parameters
-const DEFAULT_CERTAINTY_THRESHOLD = 0.5;
 const DEFAULT_EXACT_MATCH_THRESHOLD = 0.95;
 const DEFAULT_SIMILARITY_WEIGHT = 0.6;
 const DEFAULT_RECENCY_WEIGHT = 0.2;
@@ -28,7 +27,7 @@ interface SearchParams {
 export async function searchImages({
   query,
   limit = parseInt(process.env.NEXT_PUBLIC_MAX_RESULTS || '144'),
-  certainty_threshold,
+  certainty_threshold = 0.5,
   exact_match_threshold = parseFloat(process.env.VECTOR_SEARCH_EXACT_MATCH_THRESHOLD || DEFAULT_EXACT_MATCH_THRESHOLD.toString()),
   similarity_weight = parseFloat(process.env.VECTOR_SEARCH_SIMILARITY_WEIGHT || DEFAULT_SIMILARITY_WEIGHT.toString()),
   recency_weight = parseFloat(process.env.VECTOR_SEARCH_RECENCY_WEIGHT || DEFAULT_RECENCY_WEIGHT.toString()),
@@ -37,7 +36,7 @@ export async function searchImages({
 }: SearchParams): Promise<SearchResult[]> {
   const params = new URLSearchParams({
     limit: limit.toString(),
-    certainty_threshold: certainty_threshold?.toString() || process.env.VECTOR_SEARCH_CERTAINTY_THRESHOLD || DEFAULT_CERTAINTY_THRESHOLD.toString(),
+    certainty_threshold: certainty_threshold.toString(),
     exact_match_threshold: exact_match_threshold.toString(),
     similarity_weight: similarity_weight.toString(),
     recency_weight: recency_weight.toString(),
@@ -73,7 +72,7 @@ export async function searchByImage(
 
   const searchParams = new URLSearchParams({
     limit: params.limit?.toString() || '144',
-    certainty_threshold: params.certainty_threshold?.toString() || process.env.VECTOR_SEARCH_CERTAINTY_THRESHOLD || DEFAULT_CERTAINTY_THRESHOLD.toString(),
+    certainty_threshold: params.certainty_threshold?.toString() || '0.5',
     exact_match_threshold: params.exact_match_threshold?.toString() || '0.95',
     similarity_weight: params.similarity_weight?.toString() || '0.6',
     recency_weight: params.recency_weight?.toString() || '0.2',

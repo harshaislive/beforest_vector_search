@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   try {
     // Create cache key including date range and certainty threshold
-    const cacheKey = `${query}:${startDate || ''}:${endDate || ''}:${certaintyThreshold}`;
+    const cacheKey = `${query}:${startDate || ''}:${endDate || ''}:${certaintyThreshold || '0.5'}`;
     
     // Check cache first
     let results = await getCachedSearchResults(cacheKey);
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     if (!results) {
       results = await searchImages({ 
         query,
-        certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : undefined
+        certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : 0.5
       });
       await cacheSearchResults(cacheKey, results);
     }

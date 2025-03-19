@@ -8,9 +8,10 @@ import ImagePreviewModal from './ImagePreviewModal';
 interface ImageGridProps {
   images: (SearchResult & { temporaryLink: string | null })[];
   isLoading: boolean;
+  showScores?: boolean;
 }
 
-export default function ImageGrid({ images, isLoading }: ImageGridProps) {
+export default function ImageGrid({ images, isLoading, showScores = false }: ImageGridProps) {
   const [selectedImage, setSelectedImage] = useState<SearchResult & { temporaryLink: string | null } | null>(null);
 
   const formatScore = (score: number): string => {
@@ -60,18 +61,20 @@ export default function ImageGrid({ images, isLoading }: ImageGridProps) {
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRseHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/2wBDAR4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                 />
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white/90 font-arizona-sans text-xs">
-                      {formatScore(image.similarity_score)}
-                    </span>
-                    {image.exact_match && (
-                      <span className="text-white/90 font-arizona-sans text-xs bg-beforest-blue/30 px-1.5 py-0.5 rounded-sm">
-                        Exact
+                {showScores && (
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/90 font-arizona-sans text-xs">
+                        {formatScore(image.similarity_score)}
                       </span>
-                    )}
+                      {image.exact_match && (
+                        <span className="text-white/90 font-arizona-sans text-xs bg-beforest-blue/30 px-1.5 py-0.5 rounded-sm">
+                          Exact
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-beforest-gray">

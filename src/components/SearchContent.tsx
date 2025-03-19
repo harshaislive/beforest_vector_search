@@ -94,6 +94,7 @@ export default function SearchContent() {
         <ImageGrid
           images={searchResponse?.results || []}
           isLoading={isLoading}
+          showScores={true}
         />
       </div>
 

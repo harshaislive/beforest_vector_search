@@ -46,10 +46,29 @@ export async function GET(request: Request) {
           throw new Error('Invalid response format from search API');
         }
 
+        // Filter out invalid results
+        results = results.filter(result => 
+          result && 
+          typeof result === 'object' && 
+          result.source_csv && 
+          typeof result.source_csv === 'string' &&
+          result.dropbox_path && 
+          typeof result.dropbox_path === 'string'
+        );
+
         if (results.length === 0) {
-          console.log('No results found for query:', query);
+          console.log('No valid results found for query:', query);
+          return NextResponse.json({
+            results: [],
+            pagination: {
+              total: 0,
+              page: 1,
+              totalPages: 0,
+              hasMore: false,
+            },
+          });
         } else {
-          console.log(`Found ${results.length} results for query:`, query);
+          console.log(`Found ${results.length} valid results for query:`, query);
         }
 
         await cacheSearchResults(cacheKey, results);
@@ -60,9 +79,23 @@ export async function GET(request: Request) {
           stack: error instanceof Error ? error.stack : undefined
         });
         
+        // Check if it's a validation error
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('validation error')) {
+          return NextResponse.json({
+            results: [],
+            pagination: {
+              total: 0,
+              page: 1,
+              totalPages: 0,
+              hasMore: false,
+            },
+          });
+        }
+        
         return NextResponse.json(
           { 
-            error: 'Search failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
+            error: 'Search failed: ' + errorMessage,
             query: query
           },
           { status: 500 }

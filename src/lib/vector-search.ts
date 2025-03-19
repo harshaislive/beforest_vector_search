@@ -89,7 +89,20 @@ export async function searchImages({
           console.error('Unexpected API response format:', data);
           throw new Error('Invalid response format from search API');
         }
-        return data as SearchResult[];
+
+        // Filter out results with null source_csv to prevent validation errors
+        const validResults = data.filter(result => 
+          result && 
+          typeof result === 'object' && 
+          result.source_csv !== null && 
+          result.source_csv !== undefined
+        );
+
+        if (validResults.length === 0 && data.length > 0) {
+          console.warn('All results were filtered out due to missing source_csv');
+        }
+
+        return validResults as SearchResult[];
       } catch (fetchError) {
         console.error('Fetch error:', fetchError);
         throw fetchError;

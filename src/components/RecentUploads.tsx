@@ -46,6 +46,9 @@ export default function RecentUploads() {
     fetchRecentUploads();
   }, [page]);
 
+  // Filter out images that failed to load (no temporaryLink)
+  const validImages = uploadsResponse?.items.filter(item => item.temporaryLink !== null) || [];
+
   return (
     <>
       <div className="flex flex-col items-center mb-8 px-4 sm:px-0">
@@ -62,11 +65,11 @@ export default function RecentUploads() {
 
       <div className="mt-8 px-4 sm:px-6 lg:px-8">
         <ImageGrid
-          images={uploadsResponse?.items.map(item => ({
+          images={validImages.map(item => ({
             ...item,
             dropbox_path: item.dropbox_path,
             thumbnail_url: item.thumbnail_url
-          })) || []}
+          }))}
           isLoading={isLoading}
         />
       </div>

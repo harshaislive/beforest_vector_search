@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import SearchBar from './SearchBar';
 import ImageGrid from './ImageGrid';
 import { SearchResult } from '@/lib/types';
@@ -78,15 +77,6 @@ export default function SearchContent() {
   return (
     <>
       <div className="flex flex-col items-center mb-8 px-4 sm:px-0">
-        <div className="w-[140px] sm:w-[180px] h-[46px] sm:h-[60px] relative mb-4 sm:mb-6">
-          <Image
-            src="https://beforest.co/wp-content/uploads/2024/10/23-Beforest-Black-with-Tagline.png"
-            alt="Beforest Logo"
-            fill
-            priority
-            className="object-contain"
-          />
-        </div>
         <h1 className="font-arizona text-[28px] sm:text-[32px] text-beforest-earth tracking-wide text-center">
           Image Search
         </h1>
@@ -130,4 +120,4 @@ export default function SearchContent() {
       )}
     </>
   );
-} 
+}

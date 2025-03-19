@@ -28,11 +28,24 @@ export async function GET(request: Request) {
 
     // If not in cache, fetch from vector search API
     if (!results) {
-      results = await searchImages({ 
-        query,
-        certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : 0.5
-      });
-      await cacheSearchResults(cacheKey, results);
+      try {
+        results = await searchImages({ 
+          query,
+          certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : 0.5
+        });
+        if (results && Array.isArray(results)) {
+          await cacheSearchResults(cacheKey, results);
+        } else {
+          throw new Error('Invalid response format from search API');
+        }
+      } catch (error) {
+        console.error('Vector search error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json(
+          { error: 'Search failed: ' + errorMessage },
+          { status: 500 }
+        );
+      }
     }
 
     // Filter results by date if date range is provided

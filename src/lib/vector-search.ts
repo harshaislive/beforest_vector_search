@@ -34,22 +34,31 @@ export async function searchImages({
   source_weight = parseFloat(process.env.VECTOR_SEARCH_SOURCE_WEIGHT || DEFAULT_SOURCE_WEIGHT.toString()),
   include_vectors = process.env.VECTOR_SEARCH_INCLUDE_VECTORS === 'true' || DEFAULT_INCLUDE_VECTORS,
 }: SearchParams): Promise<SearchResult[]> {
-  const params = new URLSearchParams({
-    limit: limit.toString(),
-    certainty_threshold: certainty_threshold.toString(),
-    exact_match_threshold: exact_match_threshold.toString(),
-    similarity_weight: similarity_weight.toString(),
-    recency_weight: recency_weight.toString(),
-    source_weight: source_weight.toString(),
-    include_vectors: include_vectors.toString(),
-  });
-
   try {
     if (query) {
       // Text-based search
-      const response = await fetch(`${VECTOR_SEARCH_API_URL}?${params.toString()}&query=${encodeURIComponent(query)}`);
+      const encodedQuery = encodeURIComponent(query.trim());
+      const searchUrl = new URL(VECTOR_SEARCH_API_URL);
+      
+      // Add all parameters to the URL
+      Object.entries({
+        query: encodedQuery,
+        limit: limit.toString(),
+        certainty_threshold: certainty_threshold.toString(),
+        exact_match_threshold: exact_match_threshold.toString(),
+        similarity_weight: similarity_weight.toString(),
+        recency_weight: recency_weight.toString(),
+        source_weight: source_weight.toString(),
+        include_vectors: include_vectors.toString(),
+      }).forEach(([key, value]) => {
+        searchUrl.searchParams.append(key, value);
+      });
+
+      const response = await fetch(searchUrl.toString());
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Search API error:', errorText);
         throw new Error(`Search API returned ${response.status}: ${response.statusText}`);
       }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getOptimizedImageUrl } from '@/lib/dropbox';
+import { SearchResult } from '@/lib/types';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -12,9 +13,9 @@ export async function GET(request: Request) {
     ? parseInt(process.env.NEXT_PUBLIC_RECENT_UPLOADS_PER_PAGE, 10)
     : DEFAULT_PAGE_SIZE;
     
-  const pageSize = searchParams.get('page_size') 
-    ? parseInt(searchParams.get('page_size'), 10)
-    : defaultPageSize;
+  // Safely handle the page_size parameter
+  const pageSizeParam = searchParams.get('page_size');
+  const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : defaultPageSize;
 
   try {
     const response = await fetch(
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
 
     // Get temporary links for all images concurrently
     const itemsWithLinks = await Promise.all(
-      data.items.map(async (item) => {
+      data.items.map(async (item: SearchResult) => {
         try {
           const [thumbnailLink, previewLink] = await Promise.all([
             getOptimizedImageUrl(item.dropbox_path, 'thumbnail'),

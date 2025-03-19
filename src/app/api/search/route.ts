@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     // If not in cache, fetch from vector search API
     if (!results) {
       try {
+        console.log('Fetching from vector search API with query:', query);
         results = await searchImages({ 
           query,
           certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : 0.5,
@@ -39,16 +40,31 @@ export async function GET(request: Request) {
           include_vectors: false,
           limit: 144  // Using a large limit for initial fetch, we'll paginate later
         });
-        if (results && Array.isArray(results)) {
-          await cacheSearchResults(cacheKey, results);
-        } else {
+        
+        if (!results || !Array.isArray(results)) {
+          console.error('Invalid results format:', results);
           throw new Error('Invalid response format from search API');
         }
+
+        if (results.length === 0) {
+          console.log('No results found for query:', query);
+        } else {
+          console.log(`Found ${results.length} results for query:`, query);
+        }
+
+        await cacheSearchResults(cacheKey, results);
       } catch (error) {
-        console.error('Vector search error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Vector search error:', {
+          query,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        
         return NextResponse.json(
-          { error: 'Search failed: ' + errorMessage },
+          { 
+            error: 'Search failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
+            query: query
+          },
           { status: 500 }
         );
       }

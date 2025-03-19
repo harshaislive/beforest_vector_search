@@ -52,29 +52,52 @@ export async function searchImages({
         include_vectors: include_vectors.toString()
       };
 
-      // Ensure all parameters are set
+      // Log all parameters for debugging
+      console.log('Search parameters:', params);
+
+      // Ensure all parameters are set and properly encoded
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          searchUrl.searchParams.set(key, value);
+          try {
+            searchUrl.searchParams.set(key, value);
+          } catch (e) {
+            console.error(`Error setting parameter ${key}:`, e);
+          }
+        } else {
+          console.warn(`Missing or invalid parameter: ${key}`);
         }
       });
 
-      console.log('Search URL:', searchUrl.toString()); // For debugging
+      const finalUrl = searchUrl.toString();
+      console.log('Final Search URL:', finalUrl);
 
-      const response = await fetch(searchUrl.toString());
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Search API error:', errorText);
-        throw new Error(`Search API returned ${response.status}: ${response.statusText}`);
+      try {
+        const response = await fetch(finalUrl);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Search API error response:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText
+          });
+          throw new Error(`Search API returned ${response.status}: ${errorText || response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          console.error('Unexpected API response format:', data);
+          throw new Error('Invalid response format from search API');
+        }
+        return data as SearchResult[];
+      } catch (fetchError) {
+        console.error('Fetch error:', fetchError);
+        throw fetchError;
       }
-
-      const data = await response.json();
-      return data as SearchResult[];
     }
-    throw new Error('Either query or image file must be provided');
+    throw new Error('Query parameter is required');
   } catch (error) {
-    console.error('Error searching images:', error);
+    console.error('Error in searchImages:', error);
     throw error;
   }
 }

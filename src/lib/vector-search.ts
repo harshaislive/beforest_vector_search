@@ -1,6 +1,6 @@
 import { SearchResult } from './types';
 
-const VECTOR_SEARCH_API_URL = process.env.VECTOR_SEARCH_API_URL as string;
+const VECTOR_SEARCH_API_URL = process.env.VECTOR_SEARCH_API_URL || 'https://weaviatefilesearch-production.up.railway.app/search/text';
 
 // Default values for search parameters
 const DEFAULT_EXACT_MATCH_THRESHOLD = 0.95;

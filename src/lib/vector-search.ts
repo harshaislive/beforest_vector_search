@@ -40,8 +40,8 @@ export async function searchImages({
       const encodedQuery = encodeURIComponent(query.trim());
       const searchUrl = new URL(VECTOR_SEARCH_API_URL);
       
-      // Add all parameters to the URL
-      Object.entries({
+      // Add all parameters to the URL with their actual values
+      const params = {
         query: encodedQuery,
         limit: limit.toString(),
         certainty_threshold: certainty_threshold.toString(),
@@ -49,10 +49,17 @@ export async function searchImages({
         similarity_weight: similarity_weight.toString(),
         recency_weight: recency_weight.toString(),
         source_weight: source_weight.toString(),
-        include_vectors: include_vectors.toString(),
-      }).forEach(([key, value]) => {
-        searchUrl.searchParams.append(key, value);
+        include_vectors: include_vectors.toString()
+      };
+
+      // Ensure all parameters are set
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchUrl.searchParams.set(key, value);
+        }
       });
+
+      console.log('Search URL:', searchUrl.toString()); // For debugging
 
       const response = await fetch(searchUrl.toString());
       

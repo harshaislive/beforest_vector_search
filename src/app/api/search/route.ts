@@ -31,7 +31,13 @@ export async function GET(request: Request) {
       try {
         results = await searchImages({ 
           query,
-          certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : 0.5
+          certainty_threshold: certaintyThreshold ? parseFloat(certaintyThreshold) : 0.5,
+          exact_match_threshold: 0.95,
+          similarity_weight: 0.6,
+          recency_weight: 0.2,
+          source_weight: 0.2,
+          include_vectors: false,
+          limit: 144  // Using a large limit for initial fetch, we'll paginate later
         });
         if (results && Array.isArray(results)) {
           await cacheSearchResults(cacheKey, results);

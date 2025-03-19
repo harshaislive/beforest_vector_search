@@ -1,6 +1,6 @@
 'use client';
 
-import NavigationHeader from '../components/NavigationHeader';
+import NavigationHeader from './NavigationHeader';
 
 export default function LayoutContent({
   children,

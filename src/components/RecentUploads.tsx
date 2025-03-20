@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import ImageGrid from './ImageGrid';
+import SortControl, { SortDirection, SortType } from './SortControl';
 import { SearchResult } from '@/lib/types';
 
 interface RecentUploadsResponse {
@@ -16,12 +17,29 @@ interface RecentUploadsResponse {
 }
 
 export default function RecentUploads() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const page = parseInt(searchParams.get('page') || '1', 10);
+  const storedSortDirection = searchParams.get('sort_direction') as SortDirection || 'desc';
   
   const [isLoading, setIsLoading] = useState(false);
   const [uploadsResponse, setUploadsResponse] = useState<RecentUploadsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(storedSortDirection);
+
+  // Handle sort direction change
+  const handleSortChange = (type: SortType, direction: SortDirection) => {
+    setSortDirection(direction);
+    
+    // Update URL with new sort direction and trigger a new fetch
+    const params = new URLSearchParams(searchParams);
+    params.set('sort_direction', direction);
+    params.set('page', '1'); // Reset to first page when sort changes
+    
+    // Construct the new URL for the current page with updated parameters
+    const pathname = window.location.pathname;
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   useEffect(() => {
     async function fetchRecentUploads() {
@@ -29,7 +47,7 @@ export default function RecentUploads() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/recent-uploads?page=${page}&page_size=20`);
+        const response = await fetch(`/api/recent-uploads?page=${page}&page_size=20&sort_direction=${sortDirection}`);
         if (!response.ok) {
           throw new Error('Failed to fetch recent uploads');
         }
@@ -44,7 +62,7 @@ export default function RecentUploads() {
     }
 
     fetchRecentUploads();
-  }, [page]);
+  }, [page, sortDirection]);
 
   // Filter out images that failed to load (no temporaryLink)
   const validImages = uploadsResponse?.items.filter(item => item.temporaryLink !== null) || [];
@@ -62,15 +80,23 @@ export default function RecentUploads() {
           {error}
         </div>
       )}
+      
+      {validImages.length > 0 && (
+        <div className="flex justify-end mt-6 px-4 sm:px-6 lg:px-8">
+          <SortControl 
+            onSortChange={handleSortChange}
+            initialDirection={sortDirection}
+            initialType="date"
+            isSearchResults={false}
+          />
+        </div>
+      )}
 
-      <div className="mt-8 px-4 sm:px-6 lg:px-8">
+      <div className="mt-4 px-4 sm:px-6 lg:px-8">
         <ImageGrid
-          images={validImages.map(item => ({
-            ...item,
-            dropbox_path: item.dropbox_path,
-            thumbnail_url: item.thumbnail_url
-          }))}
+          images={validImages}
           isLoading={isLoading}
+          showScores={false}
         />
       </div>
 

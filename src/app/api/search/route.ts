@@ -11,6 +11,8 @@ export async function GET(request: Request) {
   const startDate = searchParams.get('start_date');
   const endDate = searchParams.get('end_date');
   const certaintyThreshold = searchParams.get('certainty_threshold');
+  const sortDirection = searchParams.get('sort_direction') || 'desc';
+  const sortType = searchParams.get('sort_type') || 'date';
 
   if (!query) {
     return NextResponse.json(
@@ -119,6 +121,21 @@ export async function GET(request: Request) {
         }
         return true;
       });
+    }
+
+    // Sort results based on sort_direction and sort_type
+    if (sortType === 'date') {
+      if (sortDirection === 'asc') {
+        results.sort((a, b) => new Date(a.modified_date).getTime() - new Date(b.modified_date).getTime());
+      } else {
+        results.sort((a, b) => new Date(b.modified_date).getTime() - new Date(a.modified_date).getTime());
+      }
+    } else if (sortType === 'score') {
+      if (sortDirection === 'asc') {
+        results.sort((a, b) => a.similarity_score - b.similarity_score);
+      } else {
+        results.sort((a, b) => b.similarity_score - a.similarity_score);
+      }
     }
 
     // Calculate pagination

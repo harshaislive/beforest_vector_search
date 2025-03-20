@@ -7,6 +7,7 @@ const DEFAULT_PAGE_SIZE = 20;
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = searchParams.get('page') || '1';
+  const sortDirection = searchParams.get('sort_direction') || 'desc';
   
   // Use environment variable with fallback to query param or default value
   const defaultPageSize = process.env.NEXT_PUBLIC_RECENT_UPLOADS_PER_PAGE 
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(
-      `https://weaviatefilesearch-production.up.railway.app/recent_uploads?page=${page}&page_size=${pageSize}&include_vectors=false`,
+      `https://weaviatefilesearch-production.up.railway.app/recent_uploads?page=${page}&page_size=${pageSize}&sort_direction=${sortDirection}&include_vectors=false`,
       {
         headers: {
           'accept': 'application/json',

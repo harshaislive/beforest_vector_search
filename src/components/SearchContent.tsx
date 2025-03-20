@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import SearchBar from './SearchBar';
 import ImageGrid from './ImageGrid';
+import SortControl, { SortDirection, SortType } from './SortControl';
 import { SearchResult } from '@/lib/types';
 
 interface SearchResponse {
@@ -17,13 +18,31 @@ interface SearchResponse {
 }
 
 export default function SearchContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
   const page = parseInt(searchParams.get('page') || '1', 10);
+  const storedSortDirection = searchParams.get('sort_direction') as SortDirection || 'desc';
+  const storedSortType = searchParams.get('sort_type') as SortType || 'date';
   
   const [isLoading, setIsLoading] = useState(false);
   const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(storedSortDirection);
+  const [sortType, setSortType] = useState<SortType>(storedSortType);
+
+  // Handle sort change
+  const handleSortChange = (type: SortType, direction: SortDirection) => {
+    setSortType(type);
+    setSortDirection(direction);
+    
+    // Update URL with new sort parameters and trigger a new search
+    const params = new URLSearchParams(searchParams);
+    params.set('sort_type', type);
+    params.set('sort_direction', direction);
+    params.set('page', '1'); // Reset to first page when sort changes
+    router.push(`/?${params.toString()}`);
+  };
 
   useEffect(() => {
     async function performSearch() {
@@ -40,6 +59,9 @@ export default function SearchContent() {
         searchUrl.searchParams.set('query', query);
         searchUrl.searchParams.set('page', page.toString());
         searchUrl.searchParams.set('limit', '12');
+        searchUrl.searchParams.set('sort_direction', sortDirection);
+        searchUrl.searchParams.set('sort_type', sortType);
+        
         if (certaintyThreshold) {
           searchUrl.searchParams.set('certainty_threshold', certaintyThreshold);
         }
@@ -59,7 +81,7 @@ export default function SearchContent() {
     }
 
     performSearch();
-  }, [query, page, searchParams]);
+  }, [query, page, searchParams, sortDirection, sortType]);
 
   // Handle image search results
   useEffect(() => {
@@ -89,8 +111,19 @@ export default function SearchContent() {
           {error}
         </div>
       )}
+      
+      {searchResponse && searchResponse.results.length > 0 && (
+        <div className="flex justify-end mt-6 px-4 sm:px-6 lg:px-8">
+          <SortControl 
+            onSortChange={handleSortChange} 
+            initialDirection={sortDirection}
+            initialType={sortType}
+            isSearchResults={true}
+          />
+        </div>
+      )}
 
-      <div className="mt-8 px-4 sm:px-6 lg:px-8">
+      <div className="mt-4 px-4 sm:px-6 lg:px-8">
         <ImageGrid
           images={searchResponse?.results || []}
           isLoading={isLoading}

@@ -58,6 +58,13 @@ export default function SearchBar() {
         searchUrl.searchParams.set('page', '1');
         searchUrl.searchParams.set('limit', '12');
         searchUrl.searchParams.set('certainty_threshold', value.toString());
+        // Add sort direction parameter from URL or default to desc
+        const currentSortDirection = searchParams.get('sort_direction') || 'desc';
+        searchUrl.searchParams.set('sort_direction', currentSortDirection);
+        
+        // Add sort type parameter from URL or default to date
+        const currentSortType = searchParams.get('sort_type') || 'date';
+        searchUrl.searchParams.set('sort_type', currentSortType);
 
         const response = await fetch(searchUrl.toString(), {
           method: 'POST',
@@ -87,6 +94,18 @@ export default function SearchBar() {
       params.set('query', query);
       params.set('certainty_threshold', similarityThreshold.toString());
       params.set('page', '1');
+      
+      // Preserve sort parameters if they exist in the URL
+      const currentSortDirection = searchParams.get('sort_direction');
+      if (currentSortDirection) {
+        params.set('sort_direction', currentSortDirection);
+      }
+      
+      const currentSortType = searchParams.get('sort_type');
+      if (currentSortType) {
+        params.set('sort_type', currentSortType);
+      }
+      
       router.push(`/?${params.toString()}`);
     }
   };
@@ -126,6 +145,14 @@ export default function SearchBar() {
       searchUrl.searchParams.set('page', currentPage);
       searchUrl.searchParams.set('limit', '12');
       searchUrl.searchParams.set('certainty_threshold', similarityThreshold.toString());
+      
+      // Get the current sort direction or use default
+      const currentSortDirection = searchParams.get('sort_direction') || 'desc';
+      searchUrl.searchParams.set('sort_direction', currentSortDirection);
+      
+      // Get the current sort type or use default
+      const currentSortType = searchParams.get('sort_type') || 'date';
+      searchUrl.searchParams.set('sort_type', currentSortType);
 
       // Create form data for both requests
       const descriptionFormData = new FormData();
@@ -163,6 +190,17 @@ export default function SearchBar() {
       params.set('certainty_threshold', similarityThreshold.toString());
       params.set('page', currentPage);
       params.set('search_type', 'image');
+      
+      // Preserve the sort direction
+      if (currentSortDirection) {
+        params.set('sort_direction', currentSortDirection);
+      }
+      
+      // Preserve the sort type
+      if (currentSortType) {
+        params.set('sort_type', currentSortType);
+      }
+      
       router.push(`/?${params.toString()}`);
 
       // Dispatch results

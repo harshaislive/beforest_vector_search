@@ -822,16 +822,16 @@ export default function BeforestImageSearch() {
               <div
                 key={result.id}
                 className={`beforest-result-card group cursor-pointer ${
-                  viewMode === 'list' ? 'flex items-center space-x-6 p-6' : ''
+                  viewMode === 'list' ? 'flex items-start space-x-4 p-4 min-h-[140px]' : ''
                 }`}
                 style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => openPreview(result, index)}
               >
                 {/* Image Container */}
                 <div className={`relative ${
-                  viewMode === 'list' ? 'w-32 h-32 flex-shrink-0' : 'aspect-video'
+                  viewMode === 'list' ? 'w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0' : 'aspect-video'
                 } bg-gray-100 overflow-hidden ${
-                  viewMode === 'grid' ? 'rounded-t-xl' : 'rounded-xl'
+                  viewMode === 'grid' ? 'rounded-t-xl' : 'rounded-lg'
                 }`}>
                                   {result.thumbnail_url ? (
                   <img
@@ -867,9 +867,9 @@ export default function BeforestImageSearch() {
                 </div>
                 
                 {/* Content */}
-                <div className={`${viewMode === 'grid' ? 'p-6' : 'flex-1 min-w-0'}`}>
+                <div className={`${viewMode === 'grid' ? 'p-6' : 'flex-1 min-w-0 py-2'}`}>
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="beforest-heading text-lg truncate">
+                    <h3 className={`beforest-heading ${viewMode === 'list' ? 'text-base' : 'text-lg'} truncate pr-2`}>
                       {result.file_name || 'Untitled'}
                     </h3>
                     {viewMode === 'list' && result.download_url && (
@@ -877,40 +877,40 @@ export default function BeforestImageSearch() {
                         href={result.download_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="beforest-download-btn px-4 py-2 rounded-lg text-sm flex items-center space-x-2 flex-shrink-0 ml-4"
+                        className="beforest-download-btn px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 flex-shrink-0 ml-3"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Download className="w-4 h-4" />
-                        <span>Download</span>
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Download</span>
                       </a>
                     )}
                   </div>
                   
                   {result.caption && (
-                    <p className="beforest-subheading text-sm mb-3 line-clamp-2">
+                    <p className={`beforest-subheading ${viewMode === 'list' ? 'text-xs' : 'text-sm'} mb-2 line-clamp-2`}>
                       {result.caption}
                     </p>
                   )}
                   
                   {/* Tags */}
                   {result.tags && result.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {result.tags.slice(0, 3).map((tag, tagIndex) => (
-                        <span key={tagIndex} className="beforest-tag">
+                    <div className={`flex flex-wrap gap-1.5 ${viewMode === 'list' ? 'mb-2' : 'mb-4'}`}>
+                      {result.tags.slice(0, viewMode === 'list' ? 2 : 3).map((tag, tagIndex) => (
+                        <span key={tagIndex} className={`beforest-tag ${viewMode === 'list' ? 'text-xs px-2 py-1' : ''}`}>
                           {tag}
                         </span>
                       ))}
-                      {result.tags.length > 3 && (
-                        <span className="beforest-tag">
-                          +{result.tags.length - 3} more
+                      {result.tags.length > (viewMode === 'list' ? 2 : 3) && (
+                        <span className={`beforest-tag ${viewMode === 'list' ? 'text-xs px-2 py-1' : ''}`}>
+                          +{result.tags.length - (viewMode === 'list' ? 2 : 3)} more
                         </span>
                       )}
                     </div>
                   )}
                   
                   {/* File Info */}
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="space-y-1">
+                  <div className={`flex items-center justify-between text-xs text-gray-500 ${viewMode === 'list' ? 'mt-auto' : ''}`}>
+                    <div className={`${viewMode === 'list' ? 'flex flex-wrap gap-x-4 gap-y-1 text-xs' : 'space-y-1'}`}>
                       <div>Size: {formatFileSize(result.file_size)}</div>
                       <div>Match: {result.similarity_percentage || Math.round(result.similarity * 100)}%</div>
                       <div>Source: {result.search_source || result.source}</div>

@@ -158,6 +158,8 @@ body {
   padding: 0.25rem 0.625rem;
   border-radius: 0.5rem;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .beforest-download-btn {
@@ -279,4 +281,16 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* List view specific improvements */
+@media (max-width: 640px) {
+  .beforest-result-card {
+    margin-bottom: 0.5rem;
+  }
+  
+  .beforest-tag {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.5rem;
+  }
 } 

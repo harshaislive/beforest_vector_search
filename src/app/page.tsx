@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Search, Download, Image as ImageIcon, Loader2, Filter, Grid, List, Sparkles, Camera, Calendar, FileType, Palette, Upload, X, ChevronLeft, ChevronRight, ExternalLink, Copy, Check } from 'lucide-react';
+import Link from 'next/link';
 
 interface SearchResult {
   id: string;
@@ -372,15 +373,24 @@ export default function BeforestImageSearch() {
       <header className="beforest-header sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 py-2 md:px-4 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
               <img 
                 src="/23-Beforest-Black-with-Tagline.png" 
                 alt="Beforest" 
                 className="h-6 md:h-8 w-auto"
               />
+              <div className="hidden md:block w-px h-6 bg-gray-300"></div>
+              <h1 className="text-lg md:text-xl font-semibold text-gray-900">Search</h1>
             </div>
             
             <div className="flex items-center space-x-2 md:space-x-3">
+              <Link 
+                href="/recent"
+                className="beforest-btn-secondary px-3 py-2 md:px-4 md:py-2 rounded-lg flex items-center space-x-1 md:space-x-2 text-sm md:text-base"
+              >
+                <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Recent</span>
+              </Link>
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`p-1.5 md:p-2 rounded-lg transition-colors ${
